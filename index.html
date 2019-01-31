@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Game 1</title>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+
+    <script src="jquery.sortable.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+    <script src="jquery.ui.touch-punch.min.js"></script>
+
+    <script type="text/javascript">
+
+      $(function() {
+        $(".sortable").sortable({connectWith: ".connectedSortable"}).disableSelection();
+
+        });
+
+        $( function() {
+          $( "ul.droptrue" ).sortable({
+            connectWith: "ul"
+
+          });
+        });
+
+        /*
+        game has different pages
+        page is an object
+        var
+          -trayList
+          -targetTotal
+            targetTotal takes x items from trayList and combines them
+          -piggyBankList
+            user drags items from trayList to add to targetTotal
+        */
+
+
+        //Difficulty Controls
+        //# of Coins in tray
+        //this CAN be randomized
+        var trayNum = 7;
+        //# of Coins used in Amount
+        //this WILL be randomized
+        var coinsUsed = 4;
+
+        function setDiff(numPages,difficulty){
+          this.numPages = numPages;
+          this.difficulty = difficulty;
+          if(difficulty == easy){
+
+          }
+          if(difficulty== medium){
+
+          }
+          if(difficulty == hard){
+
+          }
+
+        }
+
+        function getRand(min,max){
+          var r = Math.floor((Math.random()* max)+ min);
+          return r;
+        }
+        function getRandCoin(){
+          var coinNum;
+
+          coinNum = getRand(1,4);
+          switch(coinNum){
+            case 1:
+              addCoinToTray('penny');
+              break;
+            case 2:
+              addCoinToTray('nickel');
+              break;
+            case 3:
+              addCoinToTray('dime');
+              break;
+            case 4:
+              addCoinToTray('quarter');
+              break;
+          }
+        }
+        function addCoinToTray(coin) {
+            var $coin = coin;
+            $('.tray').append(`<img src="${$coin}">`);
+        }
+
+
+        /*
+        //key//
+        nickel.jpg
+        dime.png
+        quarter.png
+        penny.png
+        */
+
+        //Checks Items in Piggy Bank
+        function check(item){
+
+          //alert(item.attr('src'));
+          var x = 0;
+          coin = item.attr('src');
+          switch(coin){
+            case 'penny':
+              x = .01;
+              break;
+            case 'nickel':
+              x = .05;
+              break;
+            case 'dime':
+              x = .10;
+              break;
+            case 'quarter':
+              //alert('quarter');
+              x = .25;
+              break;
+          }
+          return x;
+        }
+        //Takes static trayNum and fills the tray
+        function createTray(){
+          var max = trayNum
+          for(var i = 0; i<max; i++){
+            getRandCoin();
+          }
+        }
+        //Creates Tray on document load
+        $(document).ready(function(){
+          createTray();
+          setTarget();
+        });
+
+        function setTarget(){
+          target = 0;
+          //sets target num by gathering all coins
+          //inside the tray and storing them inside the array
+          var trayList = new Array();
+          $('#tray img').each(function(){
+            //push each value into the ArrayList
+            trayList.push(check($(this)));
+          });
+          //we could change coins used to be random
+          // this is just a demo
+
+          //Set curTrayNum because we will need
+          //to decrement the trayNum on each iteration or rand might be OOB
+          curTrayNum = trayNum;
+          for(var i = 0; i<coinsUsed;i++){
+
+            addedNum = trayList[getRand(0,curTrayNum)]
+            target += addedNum;
+
+            //Remove used value from ArrayList
+            //This wont work in IE<9
+            pos = trayList.indexOf(addedNum);
+            if(~pos) trayList.splice(pos,1);
+            curTrayNum--;
+          }
+          //Fix weird Javascript rounding
+          target = Math.round(target * 100)/100;
+          $('.targetSpan').html(target);
+
+        }
+        $(document).on('click', '.checkBtn', function(){
+          total = 0;
+          //Loops thru each of the images in ul
+          $('#piggyBank img').each(function(){
+
+
+            //alert($(this).find('img').attr('src'));
+            total += check($(this));
+          });
+
+          //Deal with javascript weird rounding
+          total = Math.round(total * 100)/100;
+
+          //Add data to the span
+          $('.totalSpan').text("");
+          $('.totalSpan').html(total);
+
+          //Check win condition
+          totSpan = parseFloat('.totalSpan').value;
+          tarSpan = parseFloat('.targetSpan').value;
+          if(tarSpan == totSpan){
+            alert('You got it');
+          }
+
+
+        });
+    </script>
+    <style media="screen">
+      .sortable{
+              list-style-type: none; margin: 0;
+              float: left;
+              margin-right: 10px;
+              background: #eee;
+              padding: 5px;
+              width: 100%;}
+      .sortable img{ margin: 3px 3px 3px 0; padding: 1px; float: left; width: 100px; height: 90px; font-size: 4em; text-align: center; }
+      img{
+        max-width: 100%;
+        max-height: 90%;
+      }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Total: $<span class="totalSpan">0.00</span> Target: $<span class="targetSpan"></span></h1>
+      <div class="row">
+
+
+
+        <div class="col-sm">
+
+        </div>
+      </div>
+      <div class="row">
+        <p>piggyBank</p>
+        <div class="col-lg">
+          <ul id="piggyBank" class="sortable connectedSortable droptrue piggyBank">
+          </ul>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm">
+
+        </div>
+      </div>
+      <br><br><br><br><br><br><br>
+      <div class="row">
+        <div class="col-sm">
+          <p>tray</p>
+          <ul id="tray"class="tray sortable droptrue">
+
+          </ul>
+          <button type="button" name="button" class="checkBtn">Check</button>
+        </div>
+      </div>
+
+    </div>
+  </body>
+</html>
