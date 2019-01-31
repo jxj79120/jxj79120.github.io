@@ -50,7 +50,9 @@
           this.numPages = numPages;
           this.difficulty = difficulty;
           if(difficulty == easy){
-
+            //Set Difficulty for each setting
+            //Adjust # of coins in tray 
+            //Adjust # of coins used
           }
           if(difficulty== medium){
 
@@ -161,7 +163,8 @@
             curTrayNum--;
           }
           //Fix weird Javascript rounding
-          target = Math.round(target * 100)/100;
+          //2 decimal places
+          target = target.toFixed(2);
           $('.targetSpan').html(target);
 
         }
@@ -176,17 +179,20 @@
           });
 
           //Deal with javascript weird rounding
-          total = Math.round(total * 100)/100;
-
+          //total = Math.round(total * 1000)/1000;
+          total = total.toFixed(2);
           //Add data to the span
           $('.totalSpan').text("");
           $('.totalSpan').html(total);
 
           //Check win condition
-          totSpan = parseFloat('.totalSpan').value;
-          tarSpan = parseFloat('.targetSpan').value;
+          totSpan = parseFloat($('.totalSpan').html());
+          tarSpan = parseFloat($('.targetSpan').html());
+          //Test if parsing right amount
+          // alert(tarSpan);
+          // alert(totSpan);
           if(tarSpan == totSpan){
-            alert('You got it');
+            alert("Correct");
           }
 
 
