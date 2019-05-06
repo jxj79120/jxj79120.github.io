@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<audio id="mainMusic" preload="auto" src="mainMusic.mp3" volume=".2"></audio>
+	<title>Jay Eagle's Money Game</title>
+</head>
+
+
+
+<style>
+#faceCard {
+	position: absolute;
+	left: 50%;
+	top: 250px;
+	-webkit-transform: translateX(-50%);
+	transform: translateX(-50%);
+	//visibility: hidden;
+	z-index: 999;
+}
+#piggyBank {
+  position: absolute;
+	left: 50%;
+	top: 250px;
+	-webkit-transform: translateX(-50%);
+	transform: translateX(-50%);
+	//visibility: hidden;
+}
+#fastSelect {
+  position: absolute;
+	left: 50%;
+	top: 250px;
+	//visibility: hidden;
+	-webkit-transform: translateX(-50%);
+	transform: translateX(-50%);
+}
+#coinNinja {
+  position: absolute;
+	left: 50%;
+	top: 250px;
+	//visibility: hidden;
+	-webkit-transform: translateX(-50%);
+	transform: translateX(-50%);
+}
+#heading {
+		display: table;
+		margin: 0 auto;
+}
+.centeralign {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+.tab {
+	visibility: hidden;
+	margin-top: -.25rem;
+	//width: 100%;
+	border: 2px;
+	border-color: white;
+	border-style: solid;
+}
+
+.tabSub {
+	 visibility: hidden;
+	 //width: 100%;
+	 //border: 5px;
+	 //border-color: black;
+	 border-style: outset;
+	 padding: 2px;
+}
+
+.htpText {
+	margin:0px;
+	padding:0px;
+	font-weight: bold;"
+}
+
+.tabLabel {
+	visibility: hidden;
+}
+
+
+
+}
+</style>
+<body style="background-color: white;">
+<div class="centeralign">
+	<div id="heading" style="border: 10px; border-color: black; border-style: solid; padding: 0px; background-color: white;"><img src="mmLogoWhite.png"></div>
+	<div id="faceCard" class="centeralign">
+		<div id="faceLabel" class="tabLabel"><p class="htpText">Click Card to Begin</p></div>
+		<img src="card.png" id="card" onclick="myMove()">
+		<div id="faceTab" class="centeralign">
+				<div id="faceTabSub" style="margin-top: -1.25rem;">
+			<p id="clicktext" onclick="pbRules()" style="font-weight: bold; font-size: 18px; color: #000000;">Click Card to Begin</p></div></div>
+	</div>
+
+	<!-- Piggy Bank Card/Rules Identifiers -->
+	<div id="piggyBank" class="centeralign">
+		<div id="pbLabel" class="tabLabel"><p class="htpText">Piggy Piggy Bank Bank</p></div>
+		<a href="PiggyBank.html" style="outline:none;"><img src="card.png" id="pbCard"></a>
+		<div id="pbRules" style="top: 5px; left: 5px; position: absolute; visibility: hidden; height: 90%; overflow-y: hidden; ">
+			<p style="text-indent: 5px; font-size: 15px">You will be presented with a total and various coins. Your goal is to drag the correct value of coins from the Tray to the Piggy Bank.
+			<ul style="font-size: 15px;">
+			<li>Higher difficulty will mean larger totals, and a wider selection of coins in the tray.</li>
+			<li>Click on CHECK to confirm your total.</li>
+			<li>If your amount matches, you get 5 points.</li>
+			<li>If it doesn't you get a RED X.
+			<ul><li>Three RED X's and you lose :( </li></ul>
+			<li>You can skip forward if you find the current selection too challenging</li>
+			<ul><li>...but every skip forward will cost you 1pt.</li></ul>
+			<li>The person with the highest score wins!</li>
+			</p>
+			</ul>
+		</div>
+		<div id="pbTab" class="tab centeralign">
+				<div id="pbTabSub" class="tabSub">
+			<p class="htpText" onclick="pbRules()">How to play</p></div></div>
+	</div>
+
+<!-- Piggy Bank Card/Rules Identifiers -->
+
+	<div id="fastSelect" class="centeralign">
+		<div id="fsLabel" class="tabLabel"><p class="htpText">Fast Finger Money Match</p></div>
+		<a href="FastFingers.html"style="outline:none;"><img src="card.png" id="fsCard"></a>
+		<div id="fsRules" style="top: 5px; left: 5px; position: absolute; visibility: hidden; height: 70%; overflow-y: hidden; ">
+			<p style="text-indent: 5px; font-size: 15px">You will be presented with a total and six different selections of various coins. Your goal is to select the collection of coins that matches the target value.
+			<ul style="font-size: 15px;">
+			<li>Higher difficulty will mean higher totals, and more possible coins in each series.</li>
+			<li>If your amount matches, you get a number of points equal to how many seconds remain.</li>
+			<li>If it doesn't you match, you get zero points and move to the next board.</li>
+			<li>The person with the highest score wins!</li>
+			</p>
+			</ul>
+		</div>
+		<div id="fsTab" class="tab centeralign">
+			<div id="fsTabSub" class="tabSub">
+		<p class="htpText" onclick="fsRules()" style="position: relative; z-index: 1;">How to play</p></div></div>
+		<div id="options" style="margin-top: .5rem;">
+
+			<img id="day" src="day.png" style="height:100px; visibility: hidden; margin-right: -25px;" onclick="dayNight()">
+			<img src="gold.png" style="width:100px; height:100px; position:relative; z-index: 1;" onclick="menu()">
+			<img id="mute" src="mute.png" style="height:100px; visibility: hidden; margin-left: -25px;" onclick="toggleMute()">
+
+
+		</div>
+	</div>
+
+		<!-- Piggy Bank Card/Rules Identifiers -->
+
+	<div id="coinNinja" class="centeralign">
+		<div id="cnLabel" class="tabLabel"><p class="htpText">Money Money Money POP!</p></div>
+		<a href="MoneyPop.html"style="outline:none;"><img src="card.png" id="cnCard"></a>
+		<div id="cnRules" style="top: 5px; left: 5px; position: absolute; visibility: hidden; height: 90%; overflow-y: hidden; ">
+			<p style="text-indent: 5px; font-size: 15px">You will be presented with a total and coins will rain down from above. Your goal is to *POP* the right coins to match the total.
+			<ul style="font-size: 15px;">
+			<li>Higher difficulty will mean faster coins, and higher totals.</li>
+			<li>If your amount matches the target, you get a number of points equal </li>
+			<li>If it doesn't you match, you get zero points and move to the next board.</li>
+			<li>The person with the highest score wins!</li>
+			</p>
+			</ul>
+		</div>
+		<div id="cnTab" class="tab centeralign">
+			<div id="cnTabSub" class="tabSub">
+		<p class="htpText" onclick="cnRules()">How to play</p></div></div>
+		</div>
+
+
+</div>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="jquery.sortable.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="jquery.ui.touch-punch.min.js"></script>
+<script type="text/javascript">
+	var mainMusic = document.getElementById('mainMusic');
+  var toggle = true;
+
+
+	function menu() {
+		var dn = document.getElementById("day");
+		var mt = document.getElementById("mute");
+		if (dn.style.visibility === "hidden") { dn.style.visibility = "visible"; }
+		else { dn.style.visibility = "hidden"; }
+		if (mt.style.visibility === "hidden") { mt.style.visibility = "visible"; }
+		else { mt.style.visibility = "hidden"; }
+	}
+
+	function dayNight() {
+		//alert(document.body.style.backgroundColor);
+		//alert(document.getElementById("clicktext").style.fontcolor);
+		if (document.body.style.backgroundColor === "white") {
+			document.body.style.backgroundColor = "#404040";
+			document.getElementById("clicktext").style.color = "#808080"
+			document.getElementById("day").src = "dayN.png";
+			document.getElementById("mute").src = "muteN.png";
+
+		} else {
+			document.body.style.backgroundColor = "white";
+			document.getElementById("clicktext").style.color = "#000000"
+			document.getElementById("day").src = "day.png";
+			document.getElementById("mute").src = "mute.png";
+		}
+
+	}
+	$(document).ready(function() {
+		playPromise = mainMusic.play();
+
+		if (playPromise !== null){
+				playPromise.catch(() => {
+						//Autoplay was prevented
+				})
+		}
+		mainMusic.loop = true;
+		mainMusic.muted = false;
+		mainMusic.paused = false;
+		document.getElementById("mainMusic").volume = .5;
+
+	});
+
+	function playMusic() {
+		playPromise = mainMusic.play();
+
+		if (playPromise !== null){
+				playPromise.catch(() => {
+						//Autoplay was prevented
+				})
+		}
+		mainMusic.loop = true;
+	}
+    
+	function toggleMute(){
+		if (toggle) {
+			playMusic();
+			toggle = false;
+		} else {
+			toggle = true;
+			mainMusic.pause();
+			mainMusic.currentTime = 0;
+		}
+
+
+	}
+
+
+	function myMove() {
+        playMusic();
+
+		document.getElementById("faceCard").style.visibility = "hidden";
+	  var pb = document.getElementById("piggyBank");
+		var cn = document.getElementById("coinNinja");
+	  var pbpos = 50;
+		var cnpos = 50;
+
+		document.getElementById("pbTab").style.visibility = "hidden";
+		document.getElementById("fsTab").style.visibility = "hidden";
+		document.getElementById("cnTab").style.visibility = "hidden";
+		document.getElementById("pbTabSub").style.visibility = "hidden";
+		document.getElementById("fsTabSub").style.visibility = "hidden";
+		document.getElementById("cnTabSub").style.visibility = "hidden";
+	  var id = setInterval(frame, 10);
+
+
+	  function frame() {
+			if (cnpos >= 67) {
+				document.getElementById("pbTab").style.visibility = "visible";
+				document.getElementById("pbTabSub").style.visibility = "visible";
+				document.getElementById("fsTab").style.visibility = "visible";
+				document.getElementById("fsTabSub").style.visibility = "visible";
+				document.getElementById("cnTab").style.visibility = "visible";
+				document.getElementById("cnTabSub").style.visibility = "visible";
+
+				document.getElementById("pbLabel").style.visibility = "visible";
+				document.getElementById("fsLabel").style.visibility = "visible";
+				document.getElementById("cnLabel").style.visibility = "visible";
+	      clearInterval(id);
+	    } else {
+	      pbpos -= .1;
+				cnpos += .1;
+
+	      pb.style.left = pbpos + '%';
+				cn.style.left = cnpos + '%';
+	    }
+	  }
+	}
+
+	function pbRules() {
+		if ( document.getElementById("pbCard").style.visibility === "hidden") {
+			document.getElementById("pbCard").style.visibility = "visible";
+			document.getElementById("pbRules").style.visibility = "hidden";
+			document.getElementById("pbRules").style.overflowY = "hidden";
+		} else {
+			document.getElementById("pbCard").style.visibility = "hidden";
+			document.getElementById("pbRules").style.visibility = "visible"
+			document.getElementById("pbRules").style.overflowY = "scroll";
+		}
+	}
+
+	function fsRules() {
+		if ( document.getElementById("fsCard").style.visibility === "hidden") {
+			document.getElementById("fsCard").style.visibility = "visible";
+			document.getElementById("fsRules").style.visibility = "hidden";
+			document.getElementById("fsRules").style.overflowY = "hidden";
+		} else {
+			document.getElementById("fsCard").style.visibility = "hidden";
+			document.getElementById("fsRules").style.visibility = "visible"
+			document.getElementById("fsRules").style.overflowY = "scroll";
+		}
+	}
+
+	function cnRules() {
+		if ( document.getElementById("cnCard").style.visibility === "hidden") {
+			document.getElementById("cnCard").style.visibility = "visible";
+			document.getElementById("cnRules").style.visibility = "hidden";
+			document.getElementById("cnRules").style.overflowY = "hidden";
+		} else {
+			document.getElementById("cnCard").style.visibility = "hidden";
+			document.getElementById("cnRules").style.visibility = "visible"
+			document.getElementById("cnRules").style.overflowY = "scroll";
+		}
+	}
+</script>
+
+</body>
+</html>
