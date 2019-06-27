@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <audio id="mainMusic" preload="auto" src="mainMusic.mp3"></audio>
+  <title>Fast Finger Money Match</title>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+  <script src="jquery.sortable.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/5.8.4/firebase.js"></script>
+
+  <script src="jquery.ui.touch-punch.min.js"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+  <style>
+    .night {
+      background: #808080;
+    }
+
+    .day {
+      background: #fff;
+    }
+
+    .dayText {
+      color: #000;
+    }
+
+    .nightText {
+      color: #cccccc;
+    }
+
+    .trays {
+      width: 33%;
+      height: 125px;
+      //background-color: white;
+      border-style: outset;
+      border-width: 5px;
+      //display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  </style>
+
+  <script type="text/javascript">
+
+    var config = {
+        apiKey: "AIzaSyCgEnuJuXH1-yJJWh8B40N052e37eK_tTQ",
+        authDomain: "coindrag-f3fc4.firebaseapp.com",
+        databaseURL: "https://coindrag-f3fc4.firebaseio.com",
+        projectId: "coindrag-f3fc4",
+        storageBucket: "coindrag-f3fc4.appspot.com",
+        messagingSenderId: "390254199548"
+    };
+    firebase.initializeApp(config);
+    db = firebase.firestore();
+
+    var diff;
+    var game;
+    game = "Game2";
+    var scores = [];
+
+    //Difficulty Controls
+    //# of Coins in tray
+    //this CAN be randomized
+    var click;
+    var trayNum;
+    //# of Coins used in Amount
+    //this WILL be randomized
+    var coinsUsed;
+    var mainMusic = document.getElementById('mainMusic');
+    var tray;
+    var traysums = [0, 0, 0, 0, 0, 0, 0];
+    var breakline;
+    var totalVal;
+    var timeScore;
+    var gametime = 0;
+    var reset = false;
+
+    function addCoinToTray(coin) {
+      var $coin = coin;
+
+      var size = 100;
+      if (coin == 'penny') {
+        size = 38;
+      } else if (coin == 'nickel') {
+        size = 42;
+      } else if (coin == 'dime') {
+        size = 35;
+      } else {
+        size = 48;
+      }
+      var box = "#box" + tray;
+
+
+      //location.append(`<img src="${$coin}" style="height: ${size}px; width: ${size}px;">`);
+      $(box).append(`<img src="${$coin}" style="height: ${size}px; width: ${size}px;">`);
+    }
+    //$('#box1').append(`<img src="${$coin}" style="height: ${size}px; width: ${size}px;">`);
+
+    //Checks Items in Piggy Bank
+    function check(item) {
+      //alert(item.attr('src'));
+      var x = 0;
+      coin = item.attr('src');
+      switch (coin) {
+        case 'penny':
+          x = .01;
+          break;
+        case 'nickel':
+          x = .05;
+          break;
+        case 'dime':
+          x = .10;
+          break;
+        case 'quarter':
+          //alert('quarter');
+          x = .25;
+          break;
+      }
+      return x;
+    }
+
+    function checkVal(box) {
+      var total = 0.00;
+      $(box).each(function() {
+        total += check($(this));
+      });
+      total = total.toFixed(2);
+      console.log(tray + ":" + total);
+      return total;
+    }
+
+    function createNewBoard() {
+      var box;
+      //Clear the card
+      $('.totalSpan').html('');
+      $('.targetSpan').html('');
+      for (var i = 1; i < 7; i++) {
+        box = "#box" + i;
+        $(box).html('');
+      }
+
+      //restart the game
+
+      for (var i = 1; i < 7; i++) {
+        tray = i
+        // clear the current box
+        box = "#box" + i;
+        $(box).html('');
+        // set box for checkval
+        box = "#box" + tray + " img";
+        createTray();
+        traysums[i] = checkVal(box);
+        // if we're past the first box generator
+        if (i > 1) {
+          // starting at value for box 1, but less than the current box
+          for (var j = 1; j < i; j++) {
+            // if the vaue of the newest box equals any previous box
+            if (traysums[i] == traysums[j]) {
+              // decrement i
+              i--;
+              break;
+            }
+          }
+        }
+
+      }
+
+      setTarget();
+    }
+
+    var temp = [];
+    function getHighScores(game, diff){
+        var dbref = db.collection('TopTen').doc(game).collection('Difficulty').doc(diff);
+        //dbref = await dbref;
+           //$('#lboardTable').text(JSON.stringify(score));
+        dbref.get().then(function(doc){
+            if(doc.exists){
+              scores = doc.data().scoreArr;
+
+              // score.sort(function(a,b){
+              //   return b.score - a.score;
+              // });
+
+              prettyScores(scores);
+
+              for(i = 1; i<10;i++){
+                n = $('#name'+i).text();
+                sc = $('#score'+i).text();
+                temp[i-1] = {name:`${n}`, score:`${sc}`};
+              }
+              console.log(temp);
+              scores = temp;
+              //openLeaderBoard();
+              console.log(JSON.stringify(scores));
+              //$('#lboardTable').text(JSON.stringify(score));
+
+            }
+          });
+         }
+         function checkScore(game, diff){
+             //Run this check when timer expires
+
+             userScore = parseInt($('#score').text());
+             //need to change the getId to appropriate name
+             console.log(userScore);
+             temp = [];
+             for(i = 1; i<=10;i++){
+               n = $('#name'+i).text();
+               sc = $('#score'+i).text();
+               temp[i-1] = {name:`${n}`, score:`${sc}`};
+             }
+             if(userScore > temp[9].score){
+               //ask for initials input
+
+               //Show form to input name
+               //$('#getUserName').modal('show');
+               $('#getUserName').modal({
+               backdrop: 'static',
+               keyboard: false,
+               show:true  // to prevent closing with Esc button (if you want this too)
+              });
+               //update firebase
+
+             }
+             else{
+               gameOverScreen();
+             }
+
+
+           }
+
+           function updateLeaderboard(game, diff , name){
+              //userName = document.getElementById('un').value;
+              userScore = $('#score').text();
+              //Change getId to appropriate name
+              console.log(temp[9].score + " " + userScore);
+
+              if(parseInt(userScore) > parseInt(temp[9].score)){
+                temp[9].name=name;
+                temp[9].score=userScore;
+                temp.sort(function(a,b){
+                  return b.score -a.score;
+                });
+
+              db.collection('TopTen').doc(game).collection('Difficulty').doc(diff).set({
+                scoreArr: temp
+              });
+              prettyScores(temp);
+              console.log(JSON.stringify(temp));
+
+            }
+            console.log(temp);
+          }
+
+           function prettyScores(sArr){
+             //Function puts scores in a table in the modal
+             $('#diffLevel').text(diff);
+             $('#lboardTable').html('');
+             var bhtml =
+             `<table class="table">
+             <thead>
+              <tr>
+              <th scope="col">Rank</th>
+              <th scope="col">Name</th>
+              <th scope="col">Score</th>
+              </tr>
+              </thead>
+              <tbody id="tb">
+              `;
+             for(i=0; i < sArr.length; i++){
+               s = `
+               <tr>
+                <th scope="row">${i+1}</th>
+                <td id='name${i+1}'>${sArr[i].name}</td>
+                <td id='score${i+1}'>${sArr[i].score}</td>
+               </tr>
+               `;
+               bhtml+= s;
+             }
+             bhtml+= '</tbody></table>';
+             $('#lboardTable').append(bhtml);
+
+           }
+
+    function openLeaderBoard(){
+                //$('#leadModal').modal('show');
+                $('#leadModal').modal({
+                backdrop: 'static',
+                keyboard: false,
+                show:true  // to prevent closing with Esc button (if you want this too)
+              });
+              }
+
+
+
+
+    function createTray() {
+      if (difficulty == 'easy') {
+        trayNum = 3;
+      }
+      if (difficulty == 'medium') {
+        trayNum = 5;
+      }
+      if (difficulty == 'hard') {
+        trayNum = 7;
+      }
+      var max = trayNum
+      for (var i = 0; i < max; i++) {
+        breakline = i;
+        getRandCoin();
+      }
+    }
+
+    function getRand(min, max) {
+      var r = Math.floor((Math.random() * max) + min);
+      return r;
+    }
+
+    function getRandCoin() {
+      var coinNum;
+
+      coinNum = getRand(1, 4);
+      switch (coinNum) {
+        case 1:
+          addCoinToTray('penny');
+          break;
+        case 2:
+          addCoinToTray('nickel');
+          break;
+        case 3:
+          addCoinToTray('dime');
+          break;
+        case 4:
+          addCoinToTray('quarter');
+          break;
+      }
+    }
+
+    function setTarget() {
+      target = 0;
+      target = traysums[Math.floor(Math.random()*6)+1];
+      $('.targetSpan').html(target);
+      totalVal = target;
+
+    }
+
+    function startTimer(duration, display) {
+      var timer = duration,
+        minutes, seconds;
+      var gmin, gsec;
+      getHighScores(game, diff);
+
+      var time = setInterval(function() {
+        minutes = parseInt(timer / 100, 10);
+        seconds = parseInt(timer % 100, 10);
+        minutes = minutes < 10 ? "0" + minutes : minutes;
+        seconds = seconds < 10 ? "0" + seconds : seconds;
+        display.text(minutes + ":" + seconds);
+        document.getElementById("correct").style.opacity = document.getElementById("correct").style.opacity - .01;
+        gametime--;
+        gmin = Math.floor(gametime/6000);
+        gsec = Math.floor(gametime%6000);
+        gsec /= 100;
+        gsec = gsec.toFixed(0);
+        gmin = gmin < 10 ? "0" + gmin : gmin;
+        gsec = gsec < 10 ? "0" + gsec : gsec;
+        $('#timeG').text(gmin + ":" + gsec);
+        timeScore = Math.round(timer/100);
+        if (--timer < -1) {
+          //timer = duration;
+        }
+        if ((timer < 0 || reset == true) && gametime > 0) {
+          //clearInterval(time);
+          timer = duration;
+          createNewBoard();
+          reset = false;
+        }
+        if (gametime <= 0) {
+          $('#time').html('Game Over');
+        }
+        if ($('#time').html() == "Game Over") {
+          //alert('game over');
+          checkScore(game,diff);
+        }
+
+      }, 10);
+    }
+
+
+
+    function answer(box) {
+      total = 0;
+      $(box).each(function() {
+        total += check($(this));
+      });
+      total = total.toFixed(2);
+      $('.totalSpan').text("");
+      $('.totalSpan').html(total);
+      if (total == totalVal) {
+        score = $('.scoreNum').text();
+        score = parseInt(score);
+        score += timeScore;
+        $('.scoreNum').html(score.toString());
+        document.getElementById("correct").style.opacity = 1;
+        reset = true;
+        createNewBoard();
+      }
+      //Im not understanding the logic here?
+        else if(totalVal == null){        }
+        else if($('.strikes').html() == 'xxx'){       }
+        else if ($('.strikes').html() == "XX") {
+        $('.strikes').append("X");
+        clearInterval(time);
+        checkScore(game, diff);
+
+        //setTimeout(gameOverScreen, 5)
+      } else {
+        $('.strikes').append("X");
+        reset = true;
+        createNewBoard();
+      }
+    }
+
+    function gameOverScreen() {
+        if (confirm("Press OK to replay, or press Cancel to go back to the main menu.")) {
+          window.location.href = "FastFingers.html";
+        } else {
+          window.location.href = "MainMenu.html";
+        }
+    }
+
+    $(document).on('click', '.checkBtn', function() {
+      total = 0;
+      //Loops thru each of the images in ul
+      $('#piggyBank img').each(function() {
+        //alert($(this).find('img').attr('src'));
+        total += check($(this));
+      });
+      //Deal with javascript weird rounding
+      //total = Math.round(total * 1000)/1000;
+      total = total.toFixed(2);
+      //Add data to the span
+      $('.totalSpan').text("");
+      $('.totalSpan').html(total);
+      //Check win condition
+      totSpan = parseFloat($('.totalSpan').html());
+      tarSpan = parseFloat($('.targetSpan').html());
+      //Test if parsing right amount
+      // alert(tarSpan);
+      // alert(totSpan);
+      if (tarSpan == totSpan) {
+        //alert("Correct");
+        document.getElementById("correct").style.opacity = 1;
+        score = $('.scoreNum').text();
+        score = parseInt(score);
+        score++;
+        $('.scoreNum').html(score.toString());
+        createNewBoard();
+
+      }
+      //Adding in strikes
+      else if ($('.strikes').html() == "XX") {
+        $('.strikes').append("X");
+        gameOverScreen();
+      } else {
+        $('.strikes').append("X");
+      }
+    });
+
+    $(document).on('click', '.start', function() {
+      var matchTime = 600,
+      display = $('#time');
+      difficulty = $('.diff').val();
+      diff = difficulty;
+      startTimer(matchTime, display);
+      gametime = 12000;
+      //createTray();
+      createNewBoard();
+      playMusic();
+      $('.start').attr('disabled', 'disabled');
+    });
+
+
+    $(function() {
+      $(".sortable").sortable({
+        connectWith: ".connectedSortable"
+      }).disableSelection();
+    });
+
+    $(function() {
+      $("ul.droptrue").sortable({
+        connectWith: "ul"
+      });
+    });
+
+    //Creates Tray on document load
+    $(document).ready(function() {
+      playMusic();
+      //createTray();
+      //setTarget();
+    });
+
+    function checkForBadWords(word){
+      word = word.toLowerCase();
+      badWords = ['(bo08)[0-9]','(pi55)[0-9]*','(as5)[0-9]*','(gr093)',
+      '(ni99)[0-9]*','(po0)[0-9]*','[a-z](p009)','(pu55)[0-9]*',
+      '(ra43)[0-9]*'];
+      console.log(word);
+      var pat = /^([a-z]{2}[0-9]{3}){1}$/;
+      console.log(pat.test(word));
+      if(pat.test(word)){
+        var bW = new RegExp(badWords.join('|'),"i");
+        console.log(bW.test(word));
+        if(bW.test(word)==true){
+          return true;
+        }
+        else{
+          return false;
+        }
+      }
+      else{
+        return true;
+      }
+
+    }
+    $(document).on('click', '#submitScore', function(){
+      if(checkForBadWords($('#un').val())==false){
+      updateLeaderboard(game,diff,$('#un').val());
+
+      openLeaderBoard();
+      $('#getUserName').modal('hide');
+      }
+      else {
+        alert('Bad Name');
+      }
+
+    });
+    $(document).on('click', '#closeBoard', function(){
+      gameOverScreen();
+    });
+  </script>
+
+
+
+  <style media="screen">
+    .sortable {
+      list-style-type: none;
+      margin: 0;
+      float: left;
+      margin-right: 10px;
+      padding: 5px;
+      width: 100%;
+    }
+
+    .sortable img {
+      margin: 3px 3px 3px 0;
+      padding: 1px;
+      float: left;
+      width: 100px;
+      height: 90px;
+      font-size: 4em;
+      text-align: center;
+    }
+
+    .pText {
+      font-size: 28px;
+      font-weight: bold;
+      padding: 0px;
+      margin: 0px;
+      font-family: garamond;
+    }
+
+    .trans {
+      background: rgba(0, 0, 0, 0);
+      background-color: rgba(0, 0, 0, 0);
+      filter: alpha(opacity:0);
+    }
+
+    .tblmp {
+      //border: 0px;
+      padding: 0px;
+      margin: 0px;
+      text-align: center;
+    }
+
+
+
+
+    img {
+      max-width: 100%;
+      max-height: 90%;
+    }
+  </style>
+
+  <div class="trans" style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+    <table class="trans tblmp" id="toptable">
+      <tr class="trans tblmp">
+        <td class="trans tblmp">
+          <select class="diff" name="" style="width:100px; text-align-last: center;">
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+        </td>
+        <td class="trans">
+          <img src="mmLogoGreen.png" style="display: block; margin-left: auto; margin-right: auto;">
+        </td>
+        <td>
+          <button type="button" name="button" class="start" style="width:100px; font-weight: bold;">Start</button>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p class="pText dayText" id="timeH">Timer</p>
+        </td>
+        <td>
+          <p class="pText dayText" id="scoreH">Score</p>
+        </td>
+        <td>
+          <p class="pText dayText" id="strikeH">Strikes</p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p class="pText dayText" id="time"></p>
+        </td>
+        <td>
+          <p class="scoreNum pText dayText" id="score">0</p>
+        </td>
+        <td>
+          <p class="strikes pText" style="color: #FF0000;"></p>
+        </td>
+      </tr>
+    </table>
+
+
+  </div>
+</head>
+
+<body id="body" class="day" id="body" >
+  <div class="container dayText" style="horizontal-align: center;" id="container">
+    <table class="trans tblmp day" width="100%"><tr><td width="33%"></td><td width="34%">
+    <p id='head' class='dayText' style="font-size: 28px; text-align: center; font-family: garamond; font-weight: bold;">Total: $<span class="totalSpan">0.00</span><br />Target: $<span class="targetSpan"></span></p>
+  </td><td width="33%"><img id="correct" src="correct.png" style="width: 100px; opacity: 0;"></td></tr></table>
+    <div class="row">
+
+      <div class="col-sm" width="100%"><center>
+        <table style="width:90%;" class="trans tblmp" cellspacing="5px">
+          <tr>
+            <td id="box1" class="day trays trans" onclick="answer('#box1 img')"></td>
+            <td id="box2" class="day trays trans" onclick="answer('#box2 img')"></td>
+            <td id="box3" class="day trays trans" onclick="answer('#box3 img')"></td>
+          </tr>
+          <tr>
+            <td id="box4" class="day trays trans" onclick="answer('#box4 img')"></td>
+            <td id="box5" class="day trays trans" onclick="answer('#box5 img')"></td>
+            <td id="box6" class="day trays trans" onclick="answer('#box6 img')"></td>
+          </tr>
+          <tr>
+            <td colspan="3">
+              <p class="pText dayText" id="timeG">2:00</p>
+              <img id="day" src="day.png" style="height:100px; visibility: hidden; margin-right: -25px;" onclick="dayNight()">
+              <img src="gold.png" style="width:100px; height:100px; position:relative; z-index: 1;" onclick="menu()">
+              <img id="mute" src="mute.png" style="height:100px; visibility: hidden; margin-left: -25px;" onclick="toggleMute()">
+            </td>
+          </tr>
+        </table>
+      </center>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="modal fade"  id="leadModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">LeaderBoard <span id="diffLevel"></span> </h5>
+
+
+      </div>
+      <div class="modal-body">
+        <div id="lboardTable"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="closeBoard" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <div class="modal fade" id="getUserName" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">High Score</h5>
+        <!-- <button type="button" class="close" data-dismiss="modal" aria-label="Close"> -->
+          <!-- <span aria-hidden="true">&times;</span>
+        </button> -->
+      </div>
+      <div class="modal-body">
+        <p>Enter name:</p>
+        <p>Name must be 2 letters followed by 3 numbers</p>
+        <input type="text" id="un" name="" value="" placeholder="name">
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="submitScore" class="btn btn-primary">Save</button>
+      </div>
+    </div>
+  </div>
+  </div>
+
+</body>
+<script>
+  var night = false;
+  function menu() {
+    var dn = document.getElementById("day");
+    var mt = document.getElementById("mute");
+    if (dn.style.visibility === "hidden") {
+      dn.style.visibility = "visible";
+    } else {
+      dn.style.visibility = "hidden";
+    }
+    if (mt.style.visibility === "hidden") {
+      mt.style.visibility = "visible";
+    } else {
+      mt.style.visibility = "hidden";
+    }
+  }
+
+  function playMusic() {
+    playPromise = mainMusic.play();
+
+    if (playPromise !== null) {
+      playPromise.catch(() => {
+        //Autoplay was prevented
+      })
+    }
+    mainMusic.loop = true;
+    mainMusic.volume = .5;
+  }
+
+  function toggleMute() {
+    if (mainMusic.muted == true) {
+      mainMusic.muted = false;
+    } else if (mainMusic.paused == true) {
+      mainMusic.play();
+    } else {
+      mainMusic.pause();
+      mainMusic.currentTime = 0;
+    }
+  }
+
+
+  function dayNight() {
+    night = !night;
+    if (night) {
+      document.body.style.background = "#404040";
+      //document.body.style.background = "#404040";
+      document.getElementById("toptable").classList.remove("day");
+      document.getElementById("toptable").classList.add("night");
+
+      document.getElementById("head").classList.remove("dayText");
+      document.getElementById("head").classList.add("nightText");
+
+      document.getElementById("timeH").classList.remove("dayText");
+      document.getElementById("timeH").classList.add("nightText");
+      document.getElementById("time").classList.remove("dayText");
+      document.getElementById("time").classList.add("nightText");
+
+      document.getElementById("scoreH").classList.remove("dayText");
+      document.getElementById("scoreH").classList.add("nightText");
+      document.getElementById("score").classList.remove("dayText");
+      document.getElementById("score").classList.add("nightText");
+
+      document.getElementById("strikeH").classList.remove("dayText");
+      document.getElementById("strikeH").classList.add("nightText");
+
+      document.getElementById("day").src = "dayN.png";
+      document.getElementById("mute").src = "muteN.png";
+
+    } else if (document.getElementById("toptable").classList.contains("night")) {
+      document.body.style.background = "white";
+
+      document.getElementById("toptable").classList.remove("night");
+      document.getElementById("toptable").classList.add("day");
+
+      document.getElementById("head").classList.remove("nightText");
+      document.getElementById("head").classList.add("dayText");
+
+      document.getElementById("timeH").classList.add("dayText");
+      document.getElementById("timeH").classList.remove("nightText");
+      document.getElementById("time").classList.add("dayText");
+      document.getElementById("time").classList.remove("nightText");
+
+      document.getElementById("scoreH").classList.add("dayText");
+      document.getElementById("scoreH").classList.remove("nightText");
+      document.getElementById("score").classList.add("dayText");
+      document.getElementById("score").classList.remove("nightText");
+
+      document.getElementById("strikeH").classList.add("dayText");
+      document.getElementById("strikeH").classList.remove("nightText");
+
+      document.getElementById("day").src = "day.png";
+      document.getElementById("mute").src = "mute.png";
+    }
+
+  }
+</script>
+
+</html>
